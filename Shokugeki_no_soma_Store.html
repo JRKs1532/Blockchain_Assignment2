@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <!-- <script src="./node_modules/web3/dist/web3.min.js">
+    </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <title>Shokugeki no soma Store</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="text">
+            <h3 >Shokugeki no Soma Store</h1>
+        </div>
+        
+        <div class="grid1">
+            <div class="grid2">
+                <div class="content">
+                    <div class="c">Yukihira Soma</div>
+                    <img src="img/1.png" alt="Yukihira Soma" width="100%">
+                    <div class="e">0.004 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Yukihira Soma',4000000000000000)">Buy</button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="c">Nakiri Erina</div>
+                    <img src="img/2.png" alt="Nakiri Erina" width="100%">
+                    <div class="e">0.006 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Nakiri Erina',6000000000000000)">Buy</button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="c">Tadokoro Megumi</div>
+                    <img src="img/3.png" alt="Tadokoro Megumi" width="100%">
+                    <div class="e">0.003 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Tadokoro Megumi',3000000000000000)">Buy</button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="c">Shinomiya Kojiro</div>
+                    <img src="img/4.png" alt="Shinomiya Kojiro" width="100%">
+                    <div class="e">0.002 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Shinomiya Kojiro',2000000000000000)">Buy</button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="c">Nakiri Alice</div>
+                    <img src="img/5.png" alt="Nakiri Alice" width="100%">
+                    <div class="e">0.005 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Nakiri Alice',5000000000000000)">Buy</button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="c">Hayama Akira</div>
+                    <img src="img/6.png" alt="Hayama Akira" width="100%">
+                    <div class="e">0.001 Ether </div>
+                    <div class="button">
+                        <button id="Buy" onclick="Buy('Hayama Akira',1000000000000000)">Buy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="content2">
+                <table  id = "listtable" style="width:100%"></table>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <script>
+        function datetime() {
+            var dt = new Date();
+            var datetime = (("0" + (dt.getMonth() + 1)).slice(-2)) + "/" + (("0" + dt.getDate()).slice(-2)) + "/" + (dt.getFullYear()) + " " + (dt.getHours() + ":" + (dt.getMinutes()));
+            return datetime
+        }
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+    </script>
+    <script>
+
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+
+        let currentAccount = null;
+        window.ethereum
+            .request({ method: 'eth_accounts' })
+            .then(handleAccountsChanged)
+            .catch((err) => {
+                // Some unexpected error.
+                // For backwards compatibility reasons, if no accounts are available,
+                // eth_accounts will return an empty array.
+                console.error(err);
+            });
+
+        // Note that this event is emitted on page load.
+        // If the array of accounts is non-empty, you're already
+        // connected.
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+
+        // For now, 'eth_accounts' will continue to always return an array
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // MetaMask is locked or the user has not connected any accounts
+                console.log('Please connect to MetaMask.');
+            } else if (accounts[0] !== currentAccount) {
+                currentAccount = accounts[0];
+                listRespones();
+                // Do any other work!
+            }
+        }
+
+        let abi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "text",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "time",
+				"type": "string"
+			}
+		],
+		"name": "AddedTx",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "text",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "time",
+				"type": "string"
+			}
+		],
+		"name": "RegistrationError",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "ResponesData",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "from",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "text",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "time",
+						"type": "string"
+					}
+				],
+				"internalType": "struct Shokugeki_no_soma_Store.Respones[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "checkName",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "time",
+				"type": "string"
+			}
+		],
+		"name": "registration",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	}
+    ];
+
+        async function loadContract() {
+            return await new window.web3.eth.Contract(abi, '0x3f3f753f8CdAe4B15F3399E5B50CA50E80126E88');
+        }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+        }
+
+        function Buy(name,value) {
+            console.log(currentAccount);
+            console.log(name,value);
+            window.contract.methods.registration(name, datetime()).send({ from: currentAccount, value: value }, function (error, result) {
+                $("#result").html(result);
+                listRespones();
+            });
+            
+            window.contract.once('RegistrationError', {}, function (error, event) {
+                if (!error) {
+                    console.log(event);
+                    $("#result").html("Error: " + event.returnValues.text + "<br/>Reason: " + event.returnValues.reason);
+                }
+            });
+        };
+        function listRespones(){
+            $("#listtable").html("<tr class='col'><th >Time</th><th >Character</th><th >Owner(Address)</th></tr>");
+            window.contract.methods.ResponesData().call(function (error, result) {
+                if (!error) {
+                    result.forEach(element => {
+                        $("#listtable").append("<tr class = 'col2'>" +
+                        "<td>" + element.time + "</td>" +
+                        "<td>" + element.text+ "</td>" +
+                        "<td>" + element.from + "</td>" +
+                        "</tr>");
+                    });
+                }
+            });
+        }
+        load();
+    </script>
+
+</body>
+
+</html>
